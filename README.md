@@ -38,97 +38,107 @@ Register Number: 212222240024
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-# Load the image
-image = cv2.imread('bb.jpeg')
-image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB for Matplotlib
-
-# Plot the original image
-plt.figure(figsize=(7,3))
-plt.imshow(image_rgb)
-plt.title("Original Image")
-plt.axis('off')
+# Step 1: Load the image
+image = cv2.imread('bird.jpg')  # Load the image from file
+# Display the original image
+plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))  # Convert BGR to RGB for correct display
+plt.title("Original Image")  
+plt.axis('off') 
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/7c67ae7b-4a16-4e26-a3c3-2eeb203f2ad6)
+![image](https://github.com/user-attachments/assets/41d7bcfa-d91c-42cb-a334-7fe9e6362c9c)
 
 ### i)Image Translation
 ```python
-rows, cols, _ = image.shape
-M_translate = np.float32([[1, 0, 50], [0, 1, 100]])  # Translate by (50, 100) pixels
-translated_image = cv2.warpAffine(image_rgb, M_translate, (cols, rows))
+# Step 2: Image Translation
+tx, ty = 100, 50  # Translation factors (shift by 100 pixels horizontally and 50 vertically)
+M_translation = np.float32([[1, 0, tx], [0, 1, ty]])  # Translation matrix: 
+# [1, 0, tx] - Horizontal shift by tx
+# [0, 1, ty] - Vertical shift by ty
+translated_image = cv2.warpAffine(image, M_translation, (image.shape[1], image.shape[0]))  
 
-plt.figure(figsize=(7,3))
-plt.imshow(translated_image)
-plt.title("Translated Image")
+plt.imshow(cv2.cvtColor(translated_image, cv2.COLOR_BGR2RGB))  # Display the translated image
+plt.title("Translated Image")  
 plt.axis('off')
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/bde97058-2594-44d3-80db-50d1dcb18822)
+![image](https://github.com/user-attachments/assets/2d5bab00-c129-48e8-851d-2cfb2ceabb5f)
 
 ### ii) Image Scaling
 ```python
-scaled_image = cv2.resize(image_rgb, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_LINEAR)  # Scale by 1.5x
-
-plt.figure(figsize=(7,3))
-plt.imshow(scaled_image)
-plt.title("Scaled Image")
+# Step 3: Image Scaling
+fx, fy = 5.0, 2.0  # Scaling factors (1.5x scaling for both width and height)
+scaled_image = cv2.resize(image, None, fx=fx, fy=fy, interpolation=cv2.INTER_LINEAR)
+# resize: Resize the image by scaling factors fx, fy
+# INTER_LINEAR: Uses bilinear interpolation for resizing
+plt.imshow(cv2.cvtColor(scaled_image, cv2.COLOR_BGR2RGB))  # Display the scaled image
+plt.title("Scaled Image")  # Set title
 plt.axis('off')
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/a3932760-c1ca-4b06-ae10-c5a85bc01012)
+![image](https://github.com/user-attachments/assets/022a3485-2ac9-409f-ad48-79187f6313a4)
 
 ### iii)Image shearing
 ```python
-M_shear = np.float32([[1, 0.5, 0], [0.5, 1, 0]])  # Shear with factor 0.5
-sheared_image = cv2.warpAffine(image_rgb, M_shear, (int(cols * 1.5), int(rows * 1.5)))
+# Step 4: Image Shearing
+shear_matrix = np.float32([[1, 0.5, 0], [0.5, 1, 0]])  # Shearing matrix
+# The matrix shears the image by a factor of 0.5 in both x and y directions
+# [1, 0.5, 0] - Shear along the x-axis (horizontal)
+# [0.5, 1, 0] - Shear along the y-axis (vertical)
+sheared_image = cv2.warpAffine(image, shear_matrix, (image.shape[1], image.shape[0]))
 
-plt.figure(figsize=(7,3))
-plt.imshow(sheared_image)
-plt.title("Sheared Image")
+plt.imshow(cv2.cvtColor(sheared_image, cv2.COLOR_BGR2RGB))  # Display the sheared image
+plt.title("Sheared Image")  # Set title
 plt.axis('off')
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/b1862558-e14a-4618-bc01-db5b0543e074)
+![image](https://github.com/user-attachments/assets/abb9fa6d-13a2-4277-b3b3-c467c6c0bf71)
 
 
 ### iv)Image Reflection
 ```python
-reflected_image = cv2.flip(image_rgb, 1)  # Horizontal reflection (flip along y-axis)
+# Step 5: Image Reflection
+reflected_image = cv2.flip(image, 2)  # Flip the image horizontally (1 means horizontal flip)
+# flip: 1 means horizontal flip, 0 would be vertical flip, -1 would flip both axes
 
-plt.figure(figsize=(7,3))
-plt.imshow(reflected_image)
-plt.title("Reflected Image")
+plt.imshow(cv2.cvtColor(reflected_image, cv2.COLOR_BGR2RGB))  # Display the reflected image
+plt.title("Reflected Image")  # Set title
 plt.axis('off')
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/53219e79-8251-4e16-83ae-8059fc8cd1f8)
+![image](https://github.com/user-attachments/assets/17834df2-73e1-407a-bb89-49001a97eba7)
 
 ### v)Image Rotation
 ```python
-M_rotate = cv2.getRotationMatrix2D((cols / 2, rows / 2), 150, 1)  # Rotate by 150 degrees
-rotated_image = cv2.warpAffine(image_rgb, M_rotate, (cols, rows))
+# Step 6: Image Rotation
+(height, width) = image.shape[:2]  # Get the image height and width
+angle = 45  # Rotation angle in degrees (rotate by 45 degrees)
+center = (width // 2, height // 2)  # Set the center of rotation to the image center
+M_rotation = cv2.getRotationMatrix2D(center, angle, 1)  # Get the rotation matrix
+# getRotationMatrix2D: Takes the center of rotation, angle, and scale factor (1 means no scaling)
+rotated_image = cv2.warpAffine(image, M_rotation, (width, height))  # Apply rotation
 
-plt.figure(figsize=(7,3))
-plt.imshow(rotated_image)
-plt.title("Rotated Image")
+plt.imshow(cv2.cvtColor(rotated_image, cv2.COLOR_BGR2RGB))  # Display the rotated image
+plt.title("Rotated Image")  # Set title
 plt.axis('off')
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/ce713235-722d-4b30-80f9-061c986a80f9)
+![image](https://github.com/user-attachments/assets/8926403e-6a8e-40e6-bef1-27aefe663e4e)
 
 ### vi)Image Cropping
 ```python
-cropped_image = image_rgb[50:300, 100:400]  # Crop a portion of the image
+# Step 7: Image Cropping
+x, y, w, h = 100, 100, 200, 150  # Define the top-left corner (x, y) and the width (w) and height (h) of the crop
+# Cropping the image from coordinates (x, y) to (x+w, y+h)
+cropped_image = image[y:y+h, x:x+w]
+# The crop is performed by slicing the image array in the y and x directions
 
-# Plot cropped image separately as its aspect ratio may be different
-plt.figure(figsize=(7, 3))
-plt.imshow(cropped_image)
-plt.title("Cropped Image")
+plt.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))  # Display the cropped image
+plt.title("Cropped Image")  # Set title
 plt.axis('off')
-plt.show()
 ```
 ### Output
-![image](https://github.com/user-attachments/assets/f23c694c-b8ce-4f30-92c6-f88607f04faa)
+![image](https://github.com/user-attachments/assets/de370e79-704b-48a9-928d-5b4d9bc1be79)
 
 ## Result: 
 Thus the different image transformations such as Translation, Scaling, Shearing, Reflection, Rotation and Cropping are done using OpenCV and python programming.
